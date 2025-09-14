@@ -1,15 +1,12 @@
-// 密码保护功能
+// 密码保护功能（已禁用）
 
 /**
  * 检查是否设置了密码保护
  * 通过读取页面上嵌入的环境变量来检查
  */
 function isPasswordProtected() {
-    // 只检查普通密码
-    const pwd = window.__ENV__ && window.__ENV__.PASSWORD;
-    
-    // 检查普通密码是否有效
-    return typeof pwd === 'string' && pwd.length === 64 && !/^0+$/.test(pwd);
+    // 禁用密码保护
+    return false;
 }
 
 /**
@@ -18,7 +15,8 @@ function isPasswordProtected() {
  * 为了安全考虑，所有部署都必须设置密码
  */
 function isPasswordRequired() {
-    return !isPasswordProtected();
+    // 禁用密码强制要求
+    return false;
 }
 
 /**
@@ -26,14 +24,7 @@ function isPasswordRequired() {
  * 在关键操作前都应该调用此函数
  */
 function ensurePasswordProtection() {
-    if (isPasswordRequired()) {
-        showPasswordModal();
-        throw new Error('Password protection is required');
-    }
-    if (isPasswordProtected() && !isPasswordVerified()) {
-        showPasswordModal();
-        throw new Error('Password verification required');
-    }
+    // 禁用密码保护检查
     return true;
 }
 
@@ -67,21 +58,8 @@ async function verifyPassword(password) {
 
 // 验证状态检查
 function isPasswordVerified() {
-    try {
-        if (!isPasswordProtected()) return true;
-
-        const stored = localStorage.getItem(PASSWORD_CONFIG.localStorageKey);
-        if (!stored) return false;
-
-        const { timestamp, passwordHash } = JSON.parse(stored);
-        const currentHash = window.__ENV__?.PASSWORD;
-
-        return timestamp && passwordHash === currentHash &&
-            Date.now() - timestamp < PASSWORD_CONFIG.verificationTTL;
-    } catch (error) {
-        console.error('检查密码验证状态时出错:', error);
-        return false;
-    }
+    // 禁用密码验证检查
+    return true;
 }
 
 // 更新全局导出
@@ -110,53 +88,8 @@ async function sha256(message) {
  * 显示密码验证弹窗
  */
 function showPasswordModal() {
-    const passwordModal = document.getElementById('passwordModal');
-    if (passwordModal) {
-        // 防止出现豆瓣区域滚动条
-        document.getElementById('doubanArea').classList.add('hidden');
-        document.getElementById('passwordCancelBtn').classList.add('hidden');
-
-        // 检查是否需要强制设置密码
-        if (isPasswordRequired()) {
-            // 修改弹窗内容提示用户需要先设置密码
-            const title = passwordModal.querySelector('h2');
-            const description = passwordModal.querySelector('p');
-            if (title) title.textContent = '需要设置密码';
-            if (description) description.textContent = '请先在部署平台设置 PASSWORD 环境变量来保护您的实例';
-            
-            // 隐藏密码输入框和提交按钮，只显示提示信息
-            const form = passwordModal.querySelector('form');
-            const errorMsg = document.getElementById('passwordError');
-            if (form) form.style.display = 'none';
-            if (errorMsg) {
-                errorMsg.textContent = '为确保安全，必须设置 PASSWORD 环境变量才能使用本服务，请联系管理员进行配置';
-                errorMsg.classList.remove('hidden');
-                errorMsg.className = 'text-red-500 mt-2 font-medium'; // 改为更醒目的红色
-            }
-        } else {
-            // 正常的密码验证模式
-            const title = passwordModal.querySelector('h2');
-            const description = passwordModal.querySelector('p');
-            if (title) title.textContent = '访问验证';
-            if (description) description.textContent = '请输入密码继续访问';
-            
-            const form = passwordModal.querySelector('form');
-            if (form) form.style.display = 'block';
-        }
-
-        passwordModal.style.display = 'flex';
-
-        // 只有在非强制设置密码模式下才聚焦输入框
-        if (!isPasswordRequired()) {
-            // 确保输入框获取焦点
-            setTimeout(() => {
-                const passwordInput = document.getElementById('passwordInput');
-                if (passwordInput) {
-                    passwordInput.focus();
-                }
-            }, 100);
-        }
-    }
+    // 禁用密码验证弹窗
+    return;
 }
 
 /**
